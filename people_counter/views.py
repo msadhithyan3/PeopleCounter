@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from people_counter.counter import Test
+from people_counter import counter
 
 
 class HomePageView(TemplateView):
@@ -20,8 +20,7 @@ class HomePageView(TemplateView):
 class GetPeopleCount(GenericAPIView):
     def get(self, request, *args, **kwargs):
         try:
-            test=Test()
-            peopleCount = test.getPeopleCount()
+            peopleCount = counter.getPeopleCount()
             message = "People Count successfully Fetched"
             status_code = status.HTTP_200_OK
         except Exception:
