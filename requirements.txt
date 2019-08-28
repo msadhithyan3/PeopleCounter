@@ -1,0 +1,6 @@
+Django
+djangorestframework
+imutils
+scipy
+dlib
+opencv-contrib-python
