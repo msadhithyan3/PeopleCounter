@@ -20,18 +20,20 @@ class HomePageView(TemplateView):
 class GetPeopleCount(GenericAPIView):
     def get(self, request, *args, **kwargs):
         try:
-            peopleCount = counter.getPeopleCount()
+            peopleCount,outputVideoUrl = counter.getPeopleCount()
             message = "People Count successfully Fetched"
             status_code = status.HTTP_200_OK
         except Exception:
             traceback.print_exc()
             peopleCount = 0
+            outputVideoUrl=None
             message = "Failed to Fetch People Count"
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        success = {
+        response = {
             "data": {
                 "message": message,
-                "peopleCount": peopleCount
+                "peopleCount": peopleCount,
+                "outputVideoUrl":outputVideoUrl
             }
         }
-        return Response(success, status=status_code)
+        return Response(response, status=status_code)
