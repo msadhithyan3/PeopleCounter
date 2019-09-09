@@ -17,23 +17,31 @@ class HomePageView(TemplateView):
         return render(request, 'index.html', context=None)
 
 
+def handle_uploaded_file(file):
+    with open('people_counter/input/' + str(file), 'wb+') as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+        return destination
+
+
 class GetPeopleCount(GenericAPIView):
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
-            peopleCount,outputVideoUrl = counter.getPeopleCount()
+            handle_uploaded_file(request.FILES['file'])
+            peopleCount, outputImageUrl = counter.getPeopleCount(str(request.FILES['file']))
             message = "People Count successfully Fetched"
             status_code = status.HTTP_200_OK
         except Exception:
             traceback.print_exc()
             peopleCount = 0
-            outputVideoUrl=None
+            outputImageUrl = None
             message = "Failed to Fetch People Count"
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         response = {
             "data": {
                 "message": message,
+                "outputVideoUrl": outputImageUrl,
                 "peopleCount": peopleCount,
-                "outputVideoUrl":outputVideoUrl
             }
         }
         return Response(response, status=status_code)
