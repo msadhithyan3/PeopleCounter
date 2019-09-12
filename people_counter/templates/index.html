@@ -12,8 +12,7 @@
     if(fileSelect.files && fileSelect.files.length == 1){
      var file = fileSelect.files[0]
      formData.set("file", file , file.name);
-    }
-    // Http Request
+     // Http Request
    $.ajax({
        url: 'http://127.0.0.1:8000/getPeopleCount',
        type: 'POST',
@@ -32,18 +31,22 @@
        alert(error.responseJSON.data.message);
        }
    });
+    }
+    else{
+    alert("Please select file")
+    }
   }
-</script>
+    </script>
 </head>
 <body>
 <h1>PeopleCounter!</h1>
 <form>
     <div>
-        <input type="file" id="fileSelect"/>
+        <input type="file" id="fileSelect" required/>
         <button type="button" onclick="doSubmit()">Submit</button>
     </div>
     </br>
-     <div class="output" style="display:none">
+    <div class="output" style="display:none">
         <div>
             <span>API Response:</span>
         </div>
@@ -55,7 +58,7 @@
     </br>
     <div class="output" style="display:none">
         <div>
-            <span>Output image:</span>
+            <span>Output Image:</span>
         </div>
         </br>
         <div>

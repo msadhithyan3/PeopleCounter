@@ -10,7 +10,6 @@ def handleUploadedFile(file):
 
 def validateFileExtension(value):
     ext = os.path.splitext(value)[1]
-    print ext
     valid_extensions = ['.jpg', '.png']
     if not ext in valid_extensions:
         raise Exception(u'File not supported!')
