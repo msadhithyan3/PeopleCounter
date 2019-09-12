@@ -24,6 +24,8 @@
        enctype: 'multipart/form-data',
        processData: false,
        success: function (response) {
+         $(".output").show();
+         $("pre").text(JSON.stringify(response, null, '\t'));
          $("#userImage").attr('src', response.data.outputImageUrl);
        },
        error: function(error){
@@ -36,9 +38,30 @@
 <body>
 <h1>PeopleCounter!</h1>
 <form>
-    <input type="file" id="fileSelect"/>
-    <button type="button" onclick="doSubmit()">Submit</button>
-    <img src="#" alt="Image is Here" id="userImage"></img>
+    <div>
+        <input type="file" id="fileSelect"/>
+        <button type="button" onclick="doSubmit()">Submit</button>
+    </div>
+    </br>
+     <div class="output" style="display:none">
+        <div>
+            <span>API Response:</span>
+        </div>
+        </br>
+        <div>
+            <pre></pre>
+        </div>
+    </div>
+    </br>
+    <div class="output" style="display:none">
+        <div>
+            <span>Output image:</span>
+        </div>
+        </br>
+        <div>
+            <img id="userImage"></img>
+        </div>
+    </div>
 </form>
 </body>
 </html>
