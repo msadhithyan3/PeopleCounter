@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 # Create your views here.
+import os
 import traceback
 
 from django.shortcuts import render
@@ -10,6 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from people_counter import counter
+import FileOperations as fileOperations
 
 
 class HomePageView(TemplateView):
@@ -17,25 +19,21 @@ class HomePageView(TemplateView):
         return render(request, 'index.html', context=None)
 
 
-def handle_uploaded_file(file):
-    with open('people_counter/input/' + str(file), 'wb+') as destination:
-        for chunk in file.chunks():
-            destination.write(chunk)
-        return destination
-
-
 class GetPeopleCount(GenericAPIView):
     def post(self, request, *args, **kwargs):
         try:
-            handle_uploaded_file(request.FILES['file'])
-            peopleCount, outputImageUrl = counter.getPeopleCount(str(request.FILES['file']))
+            fileName = str(request.FILES['file'])
+            fileOperations.validateFileExtension(fileName)
+            fileOperations.handleUploadedFile(request.FILES['file'])
+            peopleCount, outputImageUrl = counter.getPeopleCount(fileName)
+            fileOperations.deleteFile(fileName)
             message = "People Count successfully Fetched"
             status_code = status.HTTP_200_OK
-        except Exception:
+        except Exception as ex:
             traceback.print_exc()
             peopleCount = 0
             outputImageUrl = None
-            message = "Failed to Fetch People Count"
+            message = ex.message
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         response = {
             "data": {
