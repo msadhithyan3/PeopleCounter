@@ -38,7 +38,7 @@ class GetPeopleCount(GenericAPIView):
         response = {
             "data": {
                 "message": message,
-                "outputVideoUrl": outputImageUrl,
+                "outputImageUrl": outputImageUrl,
                 "peopleCount": peopleCount,
             }
         }

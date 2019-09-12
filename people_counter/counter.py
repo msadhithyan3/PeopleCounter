@@ -194,7 +194,7 @@ def getPeopleCount(fileName):
 
         # stop the timer and display FPS information
         fps.stop()
-        outputImageUrl = "localhost:8000/static/" + fileName
+        outputImageUrl = "http://localhost:8000/static/" + fileName
         print("PeopleCount", peopleCount)
         print("outputVideoUrl", outputImageUrl)
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))

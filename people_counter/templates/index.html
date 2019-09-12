@@ -1,10 +1,44 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>PeopleCounter!</title>
-    </head>
-    <body>
-        <h1>PeopleCounter! I am Learning Django!</h1>
-    </body>
+<head>
+    <meta charset="utf-8">
+    <title>PeopleCounter!</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script type="text/javascript">
+  function doSubmit(){
+    // Form Data
+    var formData = new FormData();
+    var fileSelect = document.getElementById("fileSelect");
+    if(fileSelect.files && fileSelect.files.length == 1){
+     var file = fileSelect.files[0]
+     formData.set("file", file , file.name);
+    }
+    // Http Request
+   $.ajax({
+       url: 'http://127.0.0.1:8000/getPeopleCount',
+       type: 'POST',
+       data: formData,
+       async: false,
+       cache: false,
+       contentType: false,
+       enctype: 'multipart/form-data',
+       processData: false,
+       success: function (response) {
+         $("#userImage").attr('src', response.data.outputImageUrl);
+       },
+       error: function(error){
+       alert(error.responseJSON.data.message);
+       }
+   });
+  }
+</script>
+</head>
+<body>
+<h1>PeopleCounter!</h1>
+<form>
+    <input type="file" id="fileSelect"/>
+    <button type="button" onclick="doSubmit()">Submit</button>
+    <img src="#" alt="Image is Here" id="userImage"></img>
+</form>
+</body>
 </html>
