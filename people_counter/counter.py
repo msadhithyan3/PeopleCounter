@@ -181,11 +181,11 @@ def getPeopleCount(fileName):
 
         # show the output frame
         # cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1) & 0xFF
+#        key = cv2.waitKey(1) & 0xFF
 
         # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
-            pass
+#        if key == ord("q"):
+#            pass
 
         # increment the total number of frames processed thus far and
         # then update the FPS counter
@@ -194,7 +194,7 @@ def getPeopleCount(fileName):
 
         # stop the timer and display FPS information
         fps.stop()
-        outputImageUrl = "http://localhost:8000/static/" + fileName
+        outputImageUrl = "http://47.74.180.123:8000/static/" + fileName
         print("PeopleCount", peopleCount)
         print("outputVideoUrl", outputImageUrl)
         print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
@@ -205,7 +205,7 @@ def getPeopleCount(fileName):
             writer.release()
 
         # close any open windows
-        cv2.destroyAllWindows()
+#        cv2.destroyAllWindows()
 
         return (peopleCount, outputImageUrl)
 
