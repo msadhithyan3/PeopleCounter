@@ -166,8 +166,7 @@ def getPeopleCount(fileName):
         # construct a tuple of information we will be displaying on the
         # frame
         info = [
-            ("PeopleCount", peopleCount),
-            ("Status", currentStatus),
+            ("PeopleCount", peopleCount)
         ]
 
         # loop over the info tuples and draw them on our frame
