@@ -19,10 +19,10 @@ def getPeopleCount():
                    "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
                    "sofa", "train", "tvmonitor"]
 
-        prototxt = "people_counter/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
-        model = "people_counter/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-        input = "people_counter/videos/example_01.mp4"
-        output = "people_counter/output/videos/example_01.avi"
+        prototxt = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
+        model = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
+        input = "detection_app/videos/example_01.mp4"
+        output = "detection_app/output/videos/example_01.avi"
         skip_frames = 30
         defaultConfidence = 0.4
 
