@@ -2,7 +2,7 @@ import os
 
 
 def handleUploadedFile(file):
-    with open('people_counter/input/' + str(file), 'wb+') as destination:
+    with open('detection_app/input/' + str(file), 'wb+') as destination:
         for chunk in file.chunks():
             destination.write(chunk)
         return destination
@@ -16,5 +16,5 @@ def validateFileExtension(value):
 
 
 def deleteFile(fileName):
-    if os.path.exists('people_counter/input/' + fileName):
-        os.remove('people_counter/input/' + fileName)
+    if os.path.exists('detection_app/input/' + fileName):
+        os.remove('detection_app/input/' + fileName)

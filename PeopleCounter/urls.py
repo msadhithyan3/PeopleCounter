@@ -18,5 +18,5 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('people_counter.urls'))
+    url(r'^', include('detection_app.urls'))
 ]

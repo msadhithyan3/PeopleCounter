@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from people_counter import views
+from detection_app import views
 
 urlpatterns = [
     url(r'^$', views.HomePageView.as_view()),

@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from people_counter import counter
+from detection_app import counter
 import FileOperations as fileOperations
 
 

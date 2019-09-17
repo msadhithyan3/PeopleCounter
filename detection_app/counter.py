@@ -18,10 +18,10 @@ def getPeopleCount(fileName):
                    "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
                    "sofa", "train", "tvmonitor"]
 
-        prototxt = "people_counter/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
-        model = "people_counter/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-        input = "people_counter/input/" + fileName
-        output = "people_counter/output/" + fileName
+        prototxt = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
+        model = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
+        input = "detection_app/input/" + fileName
+        output = "detection_app/output/" + fileName
         defaultConfidence = 0.4
 
         # load our serialized model from disk
