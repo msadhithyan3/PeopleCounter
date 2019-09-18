@@ -21,9 +21,8 @@ def getPeopleCount():
 
         prototxt = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
         model = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-        input = "detection_app/videos/example_01.mp4"
         output = "detection_app/output/videos/example_01.avi"
-        skip_frames = 30
+        input = None
         defaultConfidence = 0.4
 
         # load our serialized model from disk
@@ -33,7 +32,7 @@ def getPeopleCount():
         # if a video path was not supplied, grab a reference to the webcam
         if input is None:
             print("[INFO] starting video stream...")
-            vs = VideoStream(src=0).start()
+            vs = VideoStream(src='rtsp://admin:123456@192.168.3.118').start()
             time.sleep(2.0)
 
         # otherwise, grab a reference to the video file
@@ -89,7 +88,7 @@ def getPeopleCount():
             # the writer
             if output is not None and writer is None:
                 fourcc = cv2.VideoWriter_fourcc(*"MJPG")
-                writer = cv2.VideoWriter(output, fourcc, 30, (W, H), True)
+                writer = cv2.VideoWriter(output, fourcc, 15, (W, H), True)
 
             # initialize the current status along with our list of bounding
             # box rectangles returned by either (1) our object detector or
@@ -146,29 +145,6 @@ def getPeopleCount():
 
             # otherwise, we should utilize our object *trackers* rather than
             # object *detectors* to obtain a higher frame processing throughput
-            else:
-                # loop over the trackers
-                for tracker in trackers:
-                    # set the status of our system to be 'tracking' rather
-                    # than 'waiting' or 'detecting'
-                    currentStatus = "Tracking"
-
-                    # update the tracker and grab the updated position
-                    tracker.update(rgb)
-                    pos = tracker.get_position()
-
-                    # unpack the position object
-                    startX = int(pos.left())
-                    startY = int(pos.top())
-                    endX = int(pos.right())
-                    endY = int(pos.bottom())
-
-                    # add the bounding box coordinates to the rectangles list
-                    rects.append((startX, startY, endX, endY))
-
-                # draw a horizontal line in the center of the frame -- once an
-                # object crosses this line we will determine whether they were
-                # moving 'up' or 'down'
             # cv2.line(frame, (0, H // 2), (W, H // 2), (0, 255, 255), 2)
             # use the centroid tracker to associate the (1) old object
             # centroids with (2) the newly computed object centroids
@@ -206,8 +182,7 @@ def getPeopleCount():
             # construct a tuple of information we will be displaying on the
             # frame
             info = [
-                ("PeopleCount", peopleCount),
-                ("Status", currentStatus),
+                ("PeopleCount", peopleCount)
             ]
 
             # loop over the info tuples and draw them on our frame
