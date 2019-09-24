@@ -32,7 +32,7 @@ def getPeopleCount():
         # if a video path was not supplied, grab a reference to the webcam
         if input is None:
             print("[INFO] starting video stream...")
-            vs = VideoStream(src='rtsp://admin:123456@192.168.3.118').start()
+            vs = VideoStream(src='rtsp://admin:V6YN7j4kfR#@!@192.168.3.118').start()
             time.sleep(2.0)
 
         # otherwise, grab a reference to the video file
