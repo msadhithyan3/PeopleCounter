@@ -1,8 +1,12 @@
+import numpy as np
 import tensorflow as tf
 import cv2 as cv
 
 # Read the graph.
-with tf.gfile.FastGFile('frozen_inference_graph.pb', 'rb') as f:
+CLASSES = ["person"]
+COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+
+with tf.gfile.FastGFile('inference_graph/frozen_inference_graph.pb', 'rb') as f:
     graph_def = tf.GraphDef()
     graph_def.ParseFromString(f.read())
 
@@ -12,7 +16,7 @@ with tf.Session() as sess:
     tf.import_graph_def(graph_def, name='')
 
     # Read and preprocess an image.
-    img = cv.imread('input/raccoon-1.jpg')
+    img = cv.imread('input/person1.jpg')
     rows = img.shape[0]
     cols = img.shape[1]
     inp = cv.resize(img, (300, 300))
@@ -29,14 +33,17 @@ with tf.Session() as sess:
     num_detections = int(out[0][0])
     for i in range(num_detections):
         classId = int(out[3][0][i])
+        classId -= 1
         score = float(out[1][0][i])
         bbox = [float(v) for v in out[2][0][i]]
-        if score > 0.3:
-            x = bbox[1] * cols
-            y = bbox[0] * rows
-            right = bbox[3] * cols
-            bottom = bbox[2] * rows
-            cv.rectangle(img, (int(x), int(y)), (int(right), int(bottom)), (125, 255, 51), thickness=2)
+        if score > 0.4:
+            startX = int(bbox[1] * cols)
+            startY = int(bbox[0] * rows)
+            endX = int(bbox[3] * cols)
+            endY = int(bbox[2] * rows)
+            label = "{}: {:.2f}%".format(CLASSES[classId], score * 100)
+            cv.putText(img, label, (startX, startY), cv.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[classId], 2)
+            cv.rectangle(img, (startX, startY), (endX, endY), COLORS[classId], thickness=1)
 
 cv.imshow('TensorFlow MobileNet-SSD', img)
 cv.waitKey()
