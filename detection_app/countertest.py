@@ -8,6 +8,8 @@ import time
 import dlib
 import cv2
 import tensorflow as tf
+from object_detection.utils import label_map_util
+from object_detection.utils import visualization_utils as vis_util
 from pyimagesearch.centroidtracker import CentroidTracker
 from pyimagesearch.trackableobject import TrackableObject
 
@@ -16,15 +18,46 @@ def getPeopleCount():
     try:
         CLASSES = ["person"]
 
+        COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
         prototxt = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
         model = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
         output = "detection_app/output/videos/example_01.avi"
-        input = None
+        input = 'detection_app/videos/example_01.mp4'
+        input=None
         defaultConfidence = 0.4
-        with tf.gfile.FastGFile('detection_app/inference_graph/frozen_inference_graph.pb', 'rb') as f:
-            graph_def = tf.GraphDef()
-            graph_def.ParseFromString(f.read())
+        PATH_TO_CKPT = 'detection_app/inference_graph/frozen_inference_graph.pb'
+        PATH_TO_LABELS = 'detection_app/inference_graph/labelmap.pbtxt'
+        NUM_CLASSES = 1
+        label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
+        categories = label_map_util.convert_label_map_to_categories(
+            label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
+        category_index = label_map_util.create_category_index(categories)
+        # Each score represents level of confidence for each of the objects.
+        # The score is shown on the result image, together with the class label.
 
+        # Number of objects detected
+        detection_graph = tf.Graph()
+        with detection_graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+                serialized_graph = fid.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name='')
+            sess = tf.Session(graph=detection_graph)
+        # Input tensor is the image
+        image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+
+        # Output tensors are the detection boxes, scores, and classes
+        # Each box represents a part of the image where a particular object was detected
+        detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+
+        # Each score represents level of confidence for each of the objects.
+        # The score is shown on the result image, together with the class label.
+        detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
+        detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
+
+        # Number of objects detected
+        num_detections = detection_graph.get_tensor_by_name('num_detections:0')
         # load our serialized model from disk
         print("[INFO] loading model...")
         net = cv2.dnn.readNetFromCaffe(prototxt, model)
@@ -73,13 +106,11 @@ def getPeopleCount():
             # have reached the end of the video
             if input is not None and frame is None:
                 break
-
             # resize the frame to have a maximum width of 500 pixels (the
             # less data we have, the faster we can process it), then convert
             # the frame from BGR to RGB for dlib
             frame = imutils.resize(frame, width=500)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
             # if the frame dimensions are empty, set them
             if W is None or H is None:
                 (H, W) = frame.shape[:2]
@@ -93,61 +124,63 @@ def getPeopleCount():
             # initialize the current status along with our list of bounding
             # box rectangles returned by either (1) our object detector or
             # (2) the correlation trackers
-            currentStatus = "Waiting"
             rects = []
 
             # check to see if we should run a more computationally expensive
             # object detection method to aid our tracker
-            if True:
-                # set the status and initialize our new set of object trackers
-                currentStatus = "Detecting"
+            image_expanded = np.expand_dims(frame, axis=0)
+            if totalFrames % 30 == 0:
                 trackers = []
+                rows = frame.shape[0]
+                cols = frame.shape[1]
+                inp = cv2.resize(frame, (300, 300))
+                inp = inp[:, :, [2, 1, 0]]  # BGR2RGB
+                out = sess.run([sess.graph.get_tensor_by_name('num_detections:0'),
+                                sess.graph.get_tensor_by_name('detection_scores:0'),
+                                sess.graph.get_tensor_by_name('detection_boxes:0'),
+                                sess.graph.get_tensor_by_name('detection_classes:0')],
+                               feed_dict={'image_tensor:0': inp.reshape(1, inp.shape[0], inp.shape[1], 3)})
 
-                with tf.Session() as sess:
-                    # Restore session
-                    sess.graph.as_default()
-                    tf.import_graph_def(graph_def, name='')
+                # Visualize detected bounding boxes.
+                num_detections = int(out[0][0])
+                for i in range(num_detections):
+                    classId = int(out[3][0][i])
+                    classId -= 1
+                    score = float(out[1][0][i])
+                    bbox = [float(v) for v in out[2][0][i]]
+                    if score > defaultConfidence:
+                        startX = int(bbox[1] * cols)
+                        startY = int(bbox[0] * rows)
+                        endX = int(bbox[3] * cols)
+                        endY = int(bbox[2] * rows)
 
-                    # Read and preprocess an image.
-                    rows = frame.shape[0]
-                    cols = frame.shape[1]
-                    inp = cv2.resize(frame, (300, 300))
-                    inp = inp[:, :, [2, 1, 0]]  # BGR2RGB
+                        tracker = dlib.correlation_tracker()
+                        rect = dlib.rectangle(startX, startY, endX, endY)
+                        tracker.start_track(rgb, rect)
 
-                    # Run the model
-                    out = sess.run([sess.graph.get_tensor_by_name('num_detections:0'),
-                                    sess.graph.get_tensor_by_name('detection_scores:0'),
-                                    sess.graph.get_tensor_by_name('detection_boxes:0'),
-                                    sess.graph.get_tensor_by_name('detection_classes:0')],
-                                   feed_dict={'image_tensor:0': inp.reshape(1, inp.shape[0], inp.shape[1], 3)})
-                    num_detections = int(out[0][0])
-                    for i in range(num_detections):
-                        classId = int(out[3][0][i])
-                        classId -= 1
-                        score = float(out[1][0][i])
-                        bbox = [float(v) for v in out[2][0][i]]
-                        if score > 0.4:
-                            startX = int(bbox[1] * cols)
-                            startY = int(bbox[0] * rows)
-                            endX = int(bbox[3] * cols)
-                            endY = int(bbox[2] * rows)
-                            label = "{}: {:.2f}%".format(CLASSES[classId], score * 100)
-                            # cv2.putText(frame, label, (startX, startY), cv.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[classId], 2)
-                            # cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[classId], thickness=1)
-                            rects.append((startX, startY, endX, endY))
-                            tracker = dlib.correlation_tracker()
-                            rect = dlib.rectangle(startX, startY, endX, endY)
-                            tracker.start_track(rgb, rect)
+                        # add the tracker to our list of trackers so we can
+                        # utilize it during skip frames
+                        trackers.append(tracker)
 
-                            # add the tracker to our list of trackers so we can
-                            # utilize it during skip frames
-                            trackers.append(tracker)
+            else:
+                # loop over the trackers
+                for tracker in trackers:
+                    # set the status of our system to be 'tracking' rather
+                    # than 'waiting' or 'detecting'
+                    status = "Tracking"
 
-            # otherwise, we should utilize our object *trackers* rather than
-            # object *detectors* to obtain a higher frame processing throughput
-            # cv2.line(frame, (0, H // 2), (W, H // 2), (0, 255, 255), 2)
-            # use the centroid tracker to associate the (1) old object
-            # centroids with (2) the newly computed object centroids
+                    # update the tracker and grab the updated position
+                    tracker.update(rgb)
+                    pos = tracker.get_position()
+
+                    # unpack the position object
+                    startX = int(pos.left())
+                    startY = int(pos.top())
+                    endX = int(pos.right())
+                    endY = int(pos.bottom())
+
+                    # add the bounding box coordinates to the rectangles list
+                    rects.append((startX, startY, endX, endY))
             objects = ct.update(rects)
 
             # loop over the tracked objects
@@ -161,12 +194,28 @@ def getPeopleCount():
                     to = TrackableObject(objectID, centroid)
 
                 # otherwise, there is a trackable object so we can utilize it
+                # to determine direction
                 else:
+                    # the difference between the y-coordinate of the *current*
+                    # centroid and the mean of *previous* centroids will tell
+                    # us in which direction the object is moving (negative for
+                    # 'up' and positive for 'down')
+                    y = [c[1] for c in to.centroids]
+                    direction = centroid[1] - np.mean(y)
+                    to.centroids.append(centroid)
+
                     # check to see if the object has been counted or not
                     if not to.counted:
-                        # count the object
+                        # if the direction is negative (indicating the object
+                        # is moving up) AND the centroid is above the center
+                        # line, count the object
                         peopleCount += 1
                         to.counted = True
+
+                    # if the direction is positive (indicating the object
+                    # is moving down) AND the centroid is below the
+                    # center line, count the object
+
                 # store the trackable object in our dictionary
                 trackableObjects[objectID] = to
 

@@ -1,8 +1,9 @@
 import cv2 as cv
+from datetime import datetime
+now = datetime.now()
+cvNet = cv.dnn.readNetFromTensorflow('frozen_inference_graph.pb', 'graph.pbtxt')
 
-cvNet = cv.dnn.readNetFromTensorflow('inference_graph/frozen_inference_graph.pb', 'inference_graph/graph.pbtxt')
-
-img = cv.imread('input/person1.jpg')
+img = cv.imread('input/bike1.jpeg')
 rows = img.shape[0]
 cols = img.shape[1]
 cvNet.setInput(cv.dnn.blobFromImage(img, size=(300, 300), swapRB=True, crop=False))
@@ -18,4 +19,7 @@ for detection in cvOut[0,0,:,:]:
         cv.rectangle(img, (int(left), int(top)), (int(right), int(bottom)), (23, 230, 210), thickness=2)
 
 cv.imshow('img', img)
+later = datetime.now()
+difference = (later - now).total_seconds()
+print difference
 cv.waitKey()

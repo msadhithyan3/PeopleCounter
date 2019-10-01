@@ -1,8 +1,10 @@
 import numpy as np
 import tensorflow as tf
 import cv2 as cv
+from datetime import datetime
 
 # Read the graph.
+now = datetime.now()
 CLASSES = ["person"]
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
@@ -16,7 +18,7 @@ with tf.Session() as sess:
     tf.import_graph_def(graph_def, name='')
 
     # Read and preprocess an image.
-    img = cv.imread('input/person1.jpg')
+    img = cv.imread('input/bike1.jpeg')
     rows = img.shape[0]
     cols = img.shape[1]
     inp = cv.resize(img, (300, 300))
@@ -46,4 +48,7 @@ with tf.Session() as sess:
             cv.rectangle(img, (startX, startY), (endX, endY), COLORS[classId], thickness=1)
 
 cv.imshow('TensorFlow MobileNet-SSD', img)
+later = datetime.now()
+difference = (later - now).total_seconds()
+print difference
 cv.waitKey()
