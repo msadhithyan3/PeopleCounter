@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from imutils.video import FPS
@@ -18,10 +19,18 @@ def getPeopleCount(fileName):
                    "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
                    "sofa", "train", "tvmonitor"]
 
-        prototxt = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
-        model = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-        input = "detection_app/input/" + fileName
-        output = "detection_app/output/" + fileName
+        # Grab path to current working directory
+        CWD_PATH = os.getcwd()
+
+        APP_DIRECTORY = 'detection_app'
+        MODEL_DIRECTORY = 'mobilenet_ssd'
+        INPUT_DIRECTORY = 'input'
+        OUTPUT_DIRECTORY = 'output'
+
+        prototxt = os.path.join(CWD_PATH, APP_DIRECTORY, MODEL_DIRECTORY, 'MobileNetSSD_deploy.prototxt')
+        model = os.path.join(CWD_PATH, APP_DIRECTORY, MODEL_DIRECTORY, 'MobileNetSSD_deploy.caffemodel')
+        output = os.path.join(CWD_PATH, APP_DIRECTORY, OUTPUT_DIRECTORY, fileName)
+        input = os.path.join(CWD_PATH, APP_DIRECTORY, INPUT_DIRECTORY, fileName)
         defaultConfidence = 0.4
 
         # load our serialized model from disk
@@ -40,7 +49,6 @@ def getPeopleCount(fileName):
         # each of our dlib correlation trackers, followed by a dictionary to
         # map each unique object ID to a TrackableObject
         ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
-        trackers = []
         trackableObjects = {}
 
         # initialize the total number of frames processed thus far, along
@@ -50,12 +58,10 @@ def getPeopleCount(fileName):
         # start the frames per second throughput estimator
         fps = FPS().start()
 
-        # loop over frames from the video stream
         # grab the image frame and handle if we are reading from either
         frame = cv2.imread(input)
 
-        # if we are viewing a video and we did not grab a frame then we
-        # have reached the end of the video
+        # checking the grabbed grab frame
         if input is not None and frame is None:
             raise Exception('Frame Canot be Read')
 
@@ -79,13 +85,7 @@ def getPeopleCount(fileName):
         # box rectangles returned by either (1) our object detector or
         # (2) the correlation trackers
         rects = []
-
-        # check to see if we should run a more computationally expensive
-        # object detection method to aid our tracker
-        # set the status and initialize our new set of object trackers
-        currentStatus = "Detecting"
         trackers = []
-
         # convert the frame to a blob and pass the blob through the
         # network and obtain the detections
         blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
@@ -144,32 +144,20 @@ def getPeopleCount(fileName):
                 to = TrackableObject(objectID, centroid)
                 peopleCount += 1
                 to.counted = True
-
-            # otherwise, there is a trackable object so we can utilize it
-            else:
-                # check to see if the object has been counted or not
-                if not to.counted:
-                    # count the object
-                    peopleCount += 1
-                    to.counted = True
-            # store the trackable object in our dictionary
-            trackableObjects[objectID] = to
-
+                # store the trackable object in our dictionary
+                trackableObjects[objectID] = to
             # draw both the ID of the object and the centroid of the
             # object on the output frame
             text = "ID {}".format(objectID)
             cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0),
                         2)
-            # cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
             cv2.rectangle(frame, ((centroid[0] - 30, centroid[1] - 40)), ((centroid[0] + 30, centroid[1] + 40)),
                           (0, 255, 0), 1)
-
         # construct a tuple of information we will be displaying on the
         # frame
         info = [
             ("PeopleCount", peopleCount)
         ]
-
         # loop over the info tuples and draw them on our frame
         for (i, (k, v)) in enumerate(info):
             text = "{}: {}".format(k, v)
@@ -210,7 +198,6 @@ def getPeopleCount(fileName):
         #        cv2.destroyAllWindows()
 
         return (peopleCount, outputImageUrl)
-
     except Exception as ex:
         traceback.print_exc()
         raise ex

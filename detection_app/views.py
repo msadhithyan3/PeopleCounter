@@ -22,11 +22,16 @@ class HomePageView(TemplateView):
 class GetPeopleCount(GenericAPIView):
     def post(self, request, *args, **kwargs):
         try:
+            CWD_PATH = os.getcwd()
+
+            APP_DIRECTORY = 'detection_app'
+            INPUT_DIRECTORY = 'input'
             fileName = str(request.FILES['file'])
+            fileUploadedDirectory = os.path.join(CWD_PATH, APP_DIRECTORY, INPUT_DIRECTORY)+'/'+fileName
             fileOperations.validateFileExtension(fileName)
-            fileOperations.handleUploadedFile(request.FILES['file'])
+            fileOperations.handleUploadedFile(fileUploadedDirectory,request.FILES['file'])
             peopleCount, outputImageUrl = counter.getPeopleCount(fileName)
-            fileOperations.deleteFile(fileName)
+            fileOperations.deleteFile(fileUploadedDirectory)
             message = "People Count successfully Fetched"
             status_code = status.HTTP_200_OK
         except Exception as ex:
