@@ -4,3 +4,4 @@ imutils
 scipy
 dlib
 opencv-contrib-python
+tensorflow==1.14.0

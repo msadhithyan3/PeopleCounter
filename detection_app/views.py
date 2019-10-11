@@ -20,7 +20,7 @@ class HomePageView(TemplateView):
 class GetPeopleCount(GenericAPIView):
     def get(self, request, *args, **kwargs):
         try:
-            peopleCount,outputVideoUrl = counter.getPeopleCount()
+            peopleCount,outputVideoUrl = counter.getRealTimePeopleCount()
             message = "People Count successfully Fetched"
             status_code = status.HTTP_200_OK
         except Exception:

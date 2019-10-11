@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from imutils.video import VideoStream
@@ -12,16 +13,21 @@ from pyimagesearch.centroidtracker import CentroidTracker
 from pyimagesearch.trackableobject import TrackableObject
 
 
-def getPeopleCount():
+def getRealTimePeopleCount():
     try:
+        # Grab path to current working directory
+        CWD_PATH = os.getcwd()
         CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
                    "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                    "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
                    "sofa", "train", "tvmonitor"]
-
-        prototxt = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.prototxt"
-        model = "detection_app/mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-        output = "detection_app/output/videos/example_01.avi"
+        APP_DIRECTORY = 'detection_app'
+        MODEL_DIRECTORY = 'mobilenet_ssd'
+        OUTPUT_DIRECTORY = 'output'
+        prototxt = os.path.join(CWD_PATH, APP_DIRECTORY, MODEL_DIRECTORY, 'MobileNetSSD_deploy.prototxt')
+        model = os.path.join(CWD_PATH, APP_DIRECTORY, MODEL_DIRECTORY, 'MobileNetSSD_deploy.caffemodel')
+        output = os.path.join(CWD_PATH, APP_DIRECTORY, OUTPUT_DIRECTORY, 'example_01.avi')
+        input = os.path.join(CWD_PATH, APP_DIRECTORY, 'example_01.avi')
         input = None
         defaultConfidence = 0.4
 
