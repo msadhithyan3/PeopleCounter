@@ -5,4 +5,4 @@ scipy
 dlib
 opencv-contrib-python
 django-cors-headers
-tensorflow==1.14.0
+tensorflow==2.7.2
